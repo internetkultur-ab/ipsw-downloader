@@ -16,12 +16,7 @@ def md5(fname):
 	return hash_md5.hexdigest()
 	
 def notify_admin(title, message):
-	pushover_title = title
-	pushover_priority = "0"
-	pushover_message = message
-	pushover_request = requests.post(pushover_url, data={"token": pushover_apikey, "user": pushover_userkey, "message": pushover_message, "priority": pushover_priority, "title": pushover_title})
-	pushover_request
-	
+	requests.post(pushover_url, data={"token": pushover_apikey, "user": pushover_userkey, "message": message, "priority": "0", "title": title})
 
 class bcolors:
 	HEADER = '\033[95m'
@@ -55,7 +50,7 @@ print(" 🟥                                                        🟥")
 print(" 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥")
 print("")
 
-print(bcolors.HEADER + "📤 Sending message via Pushover..." + bcolors.ENDC)
+print(bcolors.HEADER + "📤 Notifying admin..." + bcolors.ENDC)
 notify_admin("Started script on " + computer_name, "Let's see if there is anything new to download.")
 print(bcolors.OKGREEN + "📫 Message sent\n" + bcolors.ENDC)
 
@@ -69,13 +64,14 @@ for identifier in identifiers:
 	latest_available_files.append(response_body['firmwares'][0]['url'].rsplit('/', 1)[-1])
 	
 	print(bcolors.HEADER + "❓ Latest available firmware for " + response_body['name'] + ":" + bcolors.ENDC)
+	print(bcolors.HEADER + "⌚️ Version " + response_body['firmwares'][0]['version'] + ", build " + response_body['firmwares'][0]['buildid'] + bcolors.ENDC)
 	print(bcolors.HEADER + "⌚️ Released " + response_body['firmwares'][0]['releasedate'] + bcolors.ENDC)
-	print(bcolors.HEADER + "❗️ " + response_body['firmwares'][0]['url'].rsplit('/', 1)[-1] + bcolors.ENDC)
+	print(bcolors.HEADER + "❗️ Filename: " + response_body['firmwares'][0]['url'].rsplit('/', 1)[-1] + bcolors.ENDC)
 	# Print checksum if one is available
 	if response_body['firmwares'][0]['md5sum'] == "":
-		print(bcolors.WARNING + "⚠️  No checksum published!!!\n" + bcolors.ENDC)
+		print(bcolors.WARNING + "⚠️  No checksum available!!!\n" + bcolors.ENDC)
 	else:
-		print(bcolors.HEADER + "❗️ " + response_body['firmwares'][0]['md5sum'] + "\n" + bcolors.ENDC)
+		print(bcolors.HEADER + "❗️ Checksum: " + response_body['firmwares'][0]['md5sum'] + "\n" + bcolors.ENDC)
 	time.sleep(0.5)
 	
 # To make space we need to first remove all unwanted firmware	
@@ -114,7 +110,7 @@ for identifier in identifiers:
 	
 	# Lookup latest firmware filename
 	print(bcolors.HEADER + "🔎 Looking for new firmware to " + response_body['name'] + bcolors.ENDC)
-	print(bcolors.HEADER + "✨ Found version " + latest_available_version + ", filename " + latest_available_file + bcolors.ENDC)
+	print(bcolors.HEADER + "✨ Latest version is " + latest_available_version + ", filename " + latest_available_file + bcolors.ENDC)
 
 	
 	# Check if latest available firmware is already present in local folder
@@ -122,7 +118,8 @@ for identifier in identifiers:
 		# Firmware is present, validating checksum if it's not already validated (duplicate file)
 		if latest_available_md5sum == "":
 			print(bcolors.WARNING + "⚠️  Firmware already downloaded, but no" + bcolors.ENDC)
-			print(bcolors.WARNING + "⚠️  checksum is published, skipping validation\n" + bcolors.ENDC)
+			print(bcolors.WARNING + "⚠️  checksum is available, skipping validation\n" + bcolors.ENDC)
+			download = False
 		else:
 			print(bcolors.HEADER + "🛂 Firmware already downloaded, validating checksum..." + bcolors.ENDC)
 			# Is checksum already validated? If not, validate.
