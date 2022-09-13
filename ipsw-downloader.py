@@ -148,26 +148,32 @@ for identifier in identifiers:
 		print(bcolors.HEADER + "❗ Found new firmware")
 		download = True
 
+
 	# Loop download until downloaded file is has a correct checksum
 	while download == True:
+		
+		# The downloading part
 		with open(firmware_folder + latest_available_file, "wb") as f:
 			print(bcolors.OKBLUE + "🚚 Downloading firmware " + latest_available_version + " for " + identifier + bcolors.ENDC)
 			response = requests.get(latest_available_url, stream=True)
 			total_length = response.headers.get('content-length')
-			if total_length is None: # no content length header
+			
+			# Nice looking download graph if content length header is present
+			if total_length is None:
 				f.write(response.content)
 			else:
 				dl = 0
 				total_length = int(total_length)
-				#for data in response.iter_content(chunk_size=4096):
 				for data in response.iter_content(chunk_size=int(total_length/100)):
 					dl += len(data)
 					f.write(data)
 					done = int(20 * dl / total_length)
 					sys.stdout.write(bcolors.OKBLUE + "\r📈 %s%s" % ('🟢' * done, '⚪' * (20-done)) + bcolors.ENDC)    
 					sys.stdout.flush()
-		if latest_available_md5sum == "":
-			print(bcolors.WARNING + "\n⚠️  No checksum published, skipping validation\n" + bcolors.ENDC)
+
+		# Validate checksum of downloaded file, if checksum is available
+		if latest_available_md5sum == "": 
+			print(bcolors.WARNING + "\n⚠️  No checksum available, skipping validation\n" + bcolors.ENDC)
 			validated_files.append(latest_available_file)
 			fresh_download = True
 			fresh_downloads.append(response_body['name'])
@@ -175,6 +181,7 @@ for identifier in identifiers:
 		else:
 			print(bcolors.HEADER + "\n🛂 Validating checksum of downloaded file..." + bcolors.ENDC)
 			md5sum = md5(firmware_folder + latest_available_file)
+			# Exit loop if checksum is valid, if not remove and download again
 			if md5sum in keep_md5sum:
 				print(bcolors.OKGREEN + "✅ Checksum is correct\n")
 				validated_files.append(latest_available_file)
@@ -188,9 +195,9 @@ for identifier in identifiers:
 
 
 
-# If new files has been downloaded send message via Pushover
+# Notify admin
 if fresh_download == True:
-	print(bcolors.HEADER + "📤 Sending message via Pushover..." + bcolors.ENDC)
+	print(bcolors.HEADER + "📤 Notifying admin..." + bcolors.ENDC)
 	admin_message = "Downloaded new firmware:\n"
 	for d in fresh_downloads:
 		admin_message += d
