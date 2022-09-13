@@ -56,6 +56,7 @@ notify_admin("Started script on " + computer_name, "Let's see if there is anythi
 print(bcolors.OKGREEN + "📫 Message sent\n" + bcolors.ENDC)
 
 
+# Go through device list and collect filenames to know which files to not delete
 for identifier in identifiers:
 	
 	# Create request to ipsw.me api
@@ -91,6 +92,7 @@ for file in os.listdir(firmware_folder):
 		time.sleep(0.1)
 print("\n")
 
+# Go through device list again. Validate already downloaded firmware and download new firmware.
 
 for identifier in identifiers:
 	
