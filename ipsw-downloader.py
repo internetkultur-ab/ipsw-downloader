@@ -3,6 +3,10 @@ import os
 import sys
 import hashlib
 import time
+from settings.py import pushover_url, pushover_userkey, pushover_apikey
+from settings.py import firmware_folder
+from settings.py import identifiers
+from settings.py import computer_name
 
 def md5(fname):
 	hash_md5 = hashlib.md5()
