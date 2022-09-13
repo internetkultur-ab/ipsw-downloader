@@ -11,3 +11,8 @@ identifiers = ['iPhone14,6','iPhone12,8','iPhone10,1','iPhone9,1','iPad7,6','iPa
 
 # Computer name, used when sending messages
 computer_name = "Computer name"
+
+
+# Crontab config
+# 30 0 * * * curl https://raw.githubusercontent.com/internetkultur-ab/ipsw-downloader/master/ipsw-downloader.py -fsS -m 10 --retry 5 -o /Users/xxx/scripts/ipsw.py
+# 0 1 * * * /usr/local/bin/python3 /Users/xxx/scripts/ipsw.py > /Users/xxx/scripts/latest.log 2>&1
