@@ -3,10 +3,10 @@ import os
 import sys
 import hashlib
 import time
-from settings.py import pushover_url, pushover_userkey, pushover_apikey
-from settings.py import firmware_folder
-from settings.py import identifiers
-from settings.py import computer_name
+from settings import pushover_url, pushover_userkey, pushover_apikey
+from settings import firmware_folder
+from settings import identifiers
+from settings import computer_name
 
 def md5(fname):
 	hash_md5 = hashlib.md5()
@@ -14,6 +14,14 @@ def md5(fname):
 		for chunk in iter(lambda: f.read(4096), b""):
 			hash_md5.update(chunk)
 	return hash_md5.hexdigest()
+	
+def notify_admin(title, message):
+	pushover_title = title
+	pushover_priority = "0"
+	pushover_message = message
+	pushover_request = requests.post(pushover_url, data={"token": pushover_apikey, "user": pushover_userkey, "message": pushover_message, "priority": pushover_priority, "title": pushover_title})
+	pushover_request
+	
 
 class bcolors:
 	HEADER = '\033[95m'
@@ -26,23 +34,13 @@ class bcolors:
 	BOLD = '\033[1m'
 	UNDERLINE = '\033[4m'
 
-
 latest_available_files = []
-
-
-
-
-
-# todo: import pushover settings
-
-
-
-
 keep_files = []
 keep_md5sum = []
 validated_files = []
 fresh_download = False
 fresh_downloads = []
+
 print("")
 print(" 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥")
 print(" 🟥                                                        🟥")
@@ -58,29 +56,29 @@ print(" 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥
 print("")
 
 print(bcolors.HEADER + "📤 Sending message via Pushover..." + bcolors.ENDC)
-pushover_title = "Started script " + computer_name
-pushover_priority = "0"
-pushover_message = "Let's see if there is anything new to download."
-pushover_request = requests.post(pushover_url, data={"token": pushover_apikey, "user": pushover_userkey, "message": pushover_message, "priority": pushover_priority, "title": pushover_title})
-pushover_request
+notify_admin("Started script on " + computer_name, "Let's see if there is anything new to download.")
 print(bcolors.OKGREEN + "📫 Message sent\n" + bcolors.ENDC)
 
 
 for identifier in identifiers:
+	
 	# Create request to ipsw.me api
 	headers = { 'Accept': 'application/json' }
 	request = requests.get('https://api.ipsw.me/v4/device/' + identifier, headers=headers)
 	response_body = request.json()
 	latest_available_files.append(response_body['firmwares'][0]['url'].rsplit('/', 1)[-1])
+	
 	print(bcolors.HEADER + "❓ Latest available firmware for " + response_body['name'] + ":" + bcolors.ENDC)
 	print(bcolors.HEADER + "⌚️ Released " + response_body['firmwares'][0]['releasedate'] + bcolors.ENDC)
 	print(bcolors.HEADER + "❗️ " + response_body['firmwares'][0]['url'].rsplit('/', 1)[-1] + bcolors.ENDC)
+	# Print checksum if one is available
 	if response_body['firmwares'][0]['md5sum'] == "":
 		print(bcolors.WARNING + "⚠️  No checksum published!!!\n" + bcolors.ENDC)
 	else:
 		print(bcolors.HEADER + "❗️ " + response_body['firmwares'][0]['md5sum'] + "\n" + bcolors.ENDC)
 	time.sleep(0.5)
 	
+# To make space we need to first remove all unwanted firmware	
 print(bcolors.HEADER + "🗑  Removing old firmware" + bcolors.ENDC)
 
 for file in os.listdir(firmware_folder):
@@ -95,6 +93,7 @@ for file in os.listdir(firmware_folder):
 		print (bcolors.HEADER + "✅ Keeping " + file + bcolors.ENDC)
 		time.sleep(0.1)
 print("\n")
+
 
 for identifier in identifiers:
 	
@@ -187,35 +186,18 @@ for identifier in identifiers:
 				os.remove(firmware_folder + latest_available_file)
 
 
-#print(bcolors.HEADER + "🧹All downloads complete, performing clean up..." + bcolors.ENDC)
 
-#for file in os.listdir(firmware_folder):
-#	if file == ".DS_Store":
-#		print(bcolors.HEADER + "✅ Keeping .DS_Store" + bcolors.ENDC)
-#	elif file not in keep_files:
-#		print(bcolors.HEADER + "🧹 Removing " + file  + bcolors.ENDC)
-#		os.remove(firmware_folder + file)
-#	elif file in keep_files:
-#		print (bcolors.HEADER + "✅ Keeping " + file + bcolors.ENDC)
-# print(bcolors.OKGREEN + "✅ Cleanup complete\n" + bcolors.ENDC)
 
 # If new files has been downloaded send message via Pushover
 if fresh_download == True:
 	print(bcolors.HEADER + "📤 Sending message via Pushover..." + bcolors.ENDC)
-	pushover_title = "Fresh downloads on " + computer_name
-	pushover_priority = "0"
-	pushover_message = "Downloaded new firmware:\n"
+	admin_message = "Downloaded new firmware:\n"
 	for d in fresh_downloads:
-		pushover_message += d
-		pushover_message += "\n"
-	pushover_request = requests.post(pushover_url, data={"token": pushover_apikey, "user": pushover_userkey, "message": pushover_message, "priority": pushover_priority, "title": pushover_title})
-	pushover_request
+		admin_message += d
+		admin_message += "\n"	
+	notify_admin("Fresh downloads on " + computer_name, admin_message)
 	print(bcolors.OKGREEN + "📫 Message sent" + bcolors.ENDC)
 else:
 	print(bcolors.HEADER + "📤 Sending message via Pushover..." + bcolors.ENDC)
-	pushover_title = "No new downloads on " + computer_name
-	pushover_priority = "0"
-	pushover_message = "There was nothing new to download."
-	pushover_request = requests.post(pushover_url, data={"token": pushover_apikey, "user": pushover_userkey, "message": pushover_message, "priority": pushover_priority, "title": pushover_title})
-	pushover_request
+	notify_admin("No new downloads on " + computer_name, "There was nothing new to download.")
 	print(bcolors.OKGREEN + "📫 Message sent" + bcolors.ENDC)
