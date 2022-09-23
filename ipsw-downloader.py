@@ -37,6 +37,7 @@ validated_files = []
 fresh_download = False
 fresh_downloads = []
 
+
 print("")
 print(" 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥")
 print(" 🟥                                                        🟥")
@@ -55,6 +56,15 @@ print(bcolors.HEADER + "📤 Notifying admin..." + bcolors.ENDC)
 notify_admin("Started script on " + computer_name, "Let's see if there is anything new to download.")
 print(bcolors.OKGREEN + "📫 Message sent\n" + bcolors.ENDC)
 
+print(bcolors.HEADER + "🗂  Checking for firmware folder, should exist at" + bcolors.ENDC)
+print(bcolors.HEADER + "🗂  " + firmware_folder + bcolors.ENDC)
+if os.path.exists(firmware_folder):
+	print(bcolors.OKGREEN + "👍 Yes, folder exists. \n" + bcolors.ENDC)
+else:
+	print(bcolors.WARNING + "👎 No, folder does not exist. Creating folder...")
+	os.mkdir(firmware_folder)
+	print(bcolors.OKGREEN + "👍 Folder created.")
+	
 
 # Go through device list and collect filenames to know which files to not delete
 for identifier in identifiers:
