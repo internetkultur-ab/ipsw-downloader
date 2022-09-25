@@ -63,7 +63,7 @@ if os.path.exists(firmware_folder):
 else:
 	print(bcolors.WARNING + "👎 No, folder does not exist. Creating folder...")
 	os.mkdir(firmware_folder)
-	print(bcolors.OKGREEN + "👍 Folder created.")
+	print(bcolors.OKGREEN + "👍 Folder created. \n")
 	
 
 # Go through device list and collect filenames to know which files to not delete
