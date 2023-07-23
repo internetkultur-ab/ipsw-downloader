@@ -59,6 +59,10 @@ else:
 
 notify_admin(message)
 
+message = ""
+for identifier in identifiers:
+    message = message + identifier + "\n"
+notify_admin(message)
 
 # Go through device list and collect filenames to know which files to not delete
 for identifier in identifiers:
