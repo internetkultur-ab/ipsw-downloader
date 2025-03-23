@@ -3,14 +3,17 @@ import os
 import sys
 import hashlib
 import time
-from settings import pushover_url, pushover_userkey, pushover_apikey
-from settings import firmware_folder
+import socket
 from settings import identifiers
-from settings import computer_name
 
-# os.getlogin()
-# os.uname().nodename
-# nodename = os.uname().nodename
+home_directory = os.environ.get("HOME")
+computer_name = socket.gethostname().split(".")[0]
+
+firmware_folder = (
+    home_directory
+    + "/Library/Group Containers/K36BKF7T3D.group.com.apple.configurator/Library/Caches/Firmware/"
+)
+
 ntfytopic = "https://ntfy.sh/ipsw-" + computer_name
 
 
@@ -23,9 +26,9 @@ def md5(fname):
 
 
 def notify_admin(message):
-    # requests.post(pushover_url, data={"token": pushover_apikey, "user": pushover_userkey, "message": message, "priority": "0", "title": title})
     requests.post(ntfytopic, data=message.encode(encoding="utf-8"), headers={})
     time.sleep(0.5)
+    print(message)
 
 
 class bcolors:
@@ -49,6 +52,7 @@ fresh_downloads = []
 
 
 notify_admin("Started script on " + computer_name)
+print("Pushing messages to " + ntfytopic + "\n")
 message = "Checking for firmware folder, should exist at \n" + firmware_folder + "\n"
 if os.path.exists(firmware_folder):
     message = message + "👍 Yes, folder exists\n"
