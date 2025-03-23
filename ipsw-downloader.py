@@ -4,7 +4,12 @@ import sys
 import hashlib
 import time
 import socket
-from settings import identifiers
+
+try:
+    from settings import identifiers
+except ModuleNotFoundError:
+    from settings_standard import identifiers
+
 
 home_directory = os.environ.get("HOME")
 computer_name = socket.gethostname().split(".")[0]
