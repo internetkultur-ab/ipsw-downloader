@@ -1,0 +1,20 @@
+# ipsw-downloader v2 configuration
+# Copy this file to config.sh and adjust. config.sh is gitignored.
+#
+#   cp config.sh.example config.sh
+
+# Webhook endpoint that receives a POST with JSON payload
+#   {"subject": "...", "body": "..."}
+# Your web server should turn that into an email.
+# Leave empty to disable notifications.
+WEBHOOK_URL=""
+
+# Set to 1 to send a notification on every run, even when nothing changed.
+NOTIFY_ALWAYS=0
+
+# Where IPSWs are stored. The default is the Apple Configurator cache folder
+# so that Configurator finds the firmware offline.
+#FIRMWARE_DIR="$HOME/Library/Group Containers/K36BKF7T3D.group.com.apple.configurator/Library/Caches/Firmware"
+
+# Where to read the device list from. Defaults to models.json next to the script.
+#MODELS_FILE="$HOME/path/to/models.json"

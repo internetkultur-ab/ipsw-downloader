@@ -1,3 +1,5 @@
 settings.py
 __pycache__/
 .nova/
+config.sh
+*.log
