@@ -2,10 +2,10 @@
 #
 # ipsw-downloader v2
 #
-# Keeps the latest IPSW for every device listed in models.json downloaded
-# in the firmware folder (Apple Configurator cache by default), using
-# blacktop's `ipsw` CLI (https://github.com/blacktop/ipsw) for downloading
-# and checksum verification.
+# Keeps the latest IPSW for every device listed in MODELS (config.sh)
+# downloaded in the firmware folder (Apple Configurator cache by default),
+# using blacktop's `ipsw` CLI (https://github.com/blacktop/ipsw) for
+# downloading and checksum verification.
 #
 # - Latest firmware is determined with `ipsw download ipsw --latest --urls`
 # - Downloads go through ipsw (SHA1 verified, resumable, parallel CDN)
@@ -26,9 +26,9 @@ if [ -f "$SCRIPT_DIR/config.sh" ]; then
 fi
 
 FIRMWARE_DIR="${FIRMWARE_DIR:-$HOME/Library/Group Containers/K36BKF7T3D.group.com.apple.configurator/Library/Caches/Firmware}"
-MODELS_FILE="${MODELS_FILE:-$SCRIPT_DIR/models.json}"
 WEBHOOK_URL="${WEBHOOK_URL:-}"
 NOTIFY_ALWAYS="${NOTIFY_ALWAYS:-0}"
+MODELS="${MODELS:-}"
 
 DRY_RUN=0
 
@@ -40,7 +40,8 @@ Usage: $(basename "$0") [--dry-run|--help]
               or sending notifications.
   --help      Show this help.
 
-Configuration lives in config.sh (see config.sh.example) and models.json.
+Configuration (devices, webhook, folders) lives in config.sh,
+see config.sh.example.
 EOF
 }
 
@@ -87,12 +88,17 @@ DEVICE_COUNT=0
 
 log "=== ipsw-downloader v2 starting on $HOSTNAME_SHORT (dry-run: $DRY_RUN)"
 log "firmware folder: $FIRMWARE_DIR"
-log "models file:     $MODELS_FILE"
 
-if [ ! -f "$MODELS_FILE" ]; then
-	echo "ERROR: models file not found: $MODELS_FILE" >&2
+if [ -z "$MODELS" ]; then
+	echo "ERROR: MODELS is not set. Copy config.sh.example to config.sh and define your devices." >&2
 	exit 1
 fi
+if ! printf '%s' "$MODELS" | jq -e 'type == "object" and length > 0' >/dev/null 2>&1; then
+	echo "ERROR: MODELS in config.sh must be a non-empty JSON object of \"identifier\": \"name\" pairs." >&2
+	exit 1
+fi
+DEVICE_TOTAL="$(printf '%s' "$MODELS" | jq 'length')"
+log "devices:         $DEVICE_TOTAL (from config.sh)"
 
 if [ ! -d "$FIRMWARE_DIR" ]; then
 	if [ "$DRY_RUN" -eq 1 ]; then
@@ -158,7 +164,7 @@ while IFS=$'\t' read -r DEVICE_ID DEVICE_NAME; do
 		ERRORS="${ERRORS}Download failed for $DEVICE_NAME ($DEVICE_ID): $LATEST_FILE"$'\n'
 		log "ERROR: download failed for $DEVICE_ID"
 	fi
-done < <(jq -r 'to_entries[] | [.key, .value] | @tsv' "$MODELS_FILE")
+done < <(printf '%s' "$MODELS" | jq -r 'to_entries[] | [.key, .value] | @tsv')
 
 # ----------------------------------------------------------------- pruning ---
 

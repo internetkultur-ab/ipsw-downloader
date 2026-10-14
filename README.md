@@ -9,7 +9,7 @@ finds it when you restore a device offline.
 
 ## What it does
 
-For every device in `models.json` it:
+For every device in `MODELS` (defined in your local `config.sh`) it:
 
 1. Asks ipsw what the latest firmware is (no bytes transferred).
 2. Downloads it with `ipsw download ipsw --latest` if it's not already in the
@@ -31,25 +31,28 @@ brew install ipsw jq
 ## Setup
 
 1. Clone the repository and check out the `v2` branch.
-2. Edit `models.json` with the devices you want. Keys are identifiers
-   (find yours at https://ipsw.me or with `ipsw device list`), values are
-   friendly names used in notifications:
-
-   ```json
-   {
-     "iPhone14,6": "iPhone SE (3rd gen)",
-     "iPad12,2": "iPad (9th Gen) Cellular"
-   }
-   ```
-
-3. Copy the config template and set your webhook URL:
+2. Create your local config (gitignored):
 
    ```bash
    cp config.sh.example config.sh
    ```
 
-   `config.sh` is gitignored. It holds `WEBHOOK_URL`, `NOTIFY_ALWAYS`,
-   and optional overrides for `FIRMWARE_DIR` and `MODELS_FILE`.
+3. Edit `config.sh`:
+
+   - `MODELS` — the devices you want, as a JSON object. Keys are identifiers
+     (find yours at https://ipsw.me or with `ipsw device list`), values are
+     friendly names used in notifications:
+
+     ```json
+     {
+       "iPhone14,6": "iPhone SE (3rd gen)",
+       "iPad12,2": "iPad (9th Gen) Cellular"
+     }
+     ```
+
+   - `WEBHOOK_URL` — your email webhook endpoint (see below), or leave empty
+     to disable notifications.
+   - Optional: `NOTIFY_ALWAYS`, `FIRMWARE_DIR`.
 
 ### Webhook / email
 

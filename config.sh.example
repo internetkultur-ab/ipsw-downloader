@@ -3,6 +3,15 @@
 #
 #   cp config.sh.example config.sh
 
+# Devices to manage, as a JSON object: identifier -> friendly name.
+# The friendly name is used in notifications; the identifier drives
+# downloads and safe pruning.
+# Find identifiers at https://ipsw.me or with `ipsw device list`.
+MODELS='{
+  "iPhone14,6": "iPhone SE (3rd gen)",
+  "iPad12,2": "iPad (9th Gen) Cellular"
+}'
+
 # Webhook endpoint that receives a POST with JSON payload
 #   {"subject": "...", "body": "..."}
 # Your web server should turn that into an email.
@@ -15,6 +24,3 @@ NOTIFY_ALWAYS=0
 # Where IPSWs are stored. The default is the Apple Configurator cache folder
 # so that Configurator finds the firmware offline.
 #FIRMWARE_DIR="$HOME/Library/Group Containers/K36BKF7T3D.group.com.apple.configurator/Library/Caches/Firmware"
-
-# Where to read the device list from. Defaults to models.json next to the script.
-#MODELS_FILE="$HOME/path/to/models.json"
